@@ -1,13 +1,18 @@
 #! /bin/bash
 
 
-
-#function receiveSingle {
-	MAC=$(arping -I wlp1s0 -c 1 192.168.88.1 | grep reply | cut -d "[" -f2 | cut -d "]" -f1)
-	MESSAGE=""
-	for i in {1..6}
-	do
-		MESSAGE=$MESSAGE$(echo $MAC | cut -d ":" -f$i | xxd -r -p$)
-	done
-	echo $MESSAGE
-#}	
+lastMac=$(arping -I vboxnet2 -c 1 192.168.58.101 | grep reply | cut -d "[" -f2 | cut -d "]" -f1)
+MESSAGE=""
+while true; do
+	MAC=$(arping -I vboxnet2 -c 1 192.168.58.101 | grep reply | cut -d "[" -f2 | cut -d "]" -f1)
+	if [ "$MAC" != "$lastMac" ]
+	then
+		for i in {2..6}
+		do
+			MESSAGE=$MESSAGE$(echo $MAC | cut -d ":" -f$i | xxd -r -p$)
+		done
+		echo -ne "$MESSAGE"
+		MESSAGE=""
+		lastMac=$MAC
+	fi
+done
